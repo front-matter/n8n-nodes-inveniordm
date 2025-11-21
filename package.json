@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-inveniordm",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"description": "n8n node for InvenioRDM API",
 	"license": "MIT",
 	"homepage": "https://github.com/front-matter/n8n-nodes-inveniordm",
