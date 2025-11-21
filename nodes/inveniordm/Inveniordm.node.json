@@ -1,0 +1,23 @@
+{
+	"node": "n8n-nodes-base.inveniordm",
+	"nodeVersion": "1.0",
+	"codex": {
+		"categories": ["Development"],
+		"subcategories": {
+			"Development": ["Data & Storage"]
+		},
+		"resources": {
+			"credentialDocumentation": [
+				{
+					"url": "https://inveniordm.docs.cern.ch/reference/rest_api_index/#authentication"
+				}
+			],
+			"primaryDocumentation": [
+				{
+					"url": "https://inveniordm.docs.cern.ch/reference/rest_api_index/"
+				}
+			]
+		},
+		"alias": ["InvenioRDM", "Research Data Management", "Repository"]
+	}
+}
