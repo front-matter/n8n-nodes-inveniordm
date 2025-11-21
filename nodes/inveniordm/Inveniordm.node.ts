@@ -307,7 +307,6 @@ export class Inveniordm implements INodeType {
 						}
 					}
 				} catch (error) {
-					console.log(`[DEBUG] Failed HTTP request - URL: ${requestUrl}, BaseURL: {{$credentials?.baseUrl}}/api`);
 					throw new NodeOperationError(this.getNode(), `Failed to load resource types from ${requestUrl}: ${error}`);
 				}
 				return returnData;
@@ -365,7 +364,6 @@ export class Inveniordm implements INodeType {
 							},
 						);
 					} catch (error) {
-						console.log(`[DEBUG] Failed HTTP request - URL: ${requestUrl}, Query params: ${JSON.stringify(qs)}, BaseURL: {{$credentials?.baseUrl}}/api`);
 						throw new NodeApiError(this.getNode(), error as JsonObject, {
 							message: `Failed to get records. URL: ${requestUrl}`,
 						});
@@ -397,7 +395,6 @@ export class Inveniordm implements INodeType {
 								},
 							);
 						} catch (error) {
-							console.log(`[DEBUG] Failed HTTP request - URL: ${requestUrl}, BaseURL: {{$credentials?.baseUrl}}/api`);
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: `Failed to create record. URL: ${requestUrl}`,
 							});
@@ -425,7 +422,6 @@ export class Inveniordm implements INodeType {
 								},
 							);
 						} catch (error) {
-							console.log(`[DEBUG] Failed HTTP request - URL: ${requestUrl}, BaseURL: {{$credentials?.baseUrl}}/api`);
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: `Failed to update record ${recordId}. URL: ${requestUrl}`,
 							});
@@ -443,7 +439,6 @@ export class Inveniordm implements INodeType {
 								},
 							);
 						} catch (error) {
-							console.log(`[DEBUG] Failed HTTP request - URL: ${requestUrl}, BaseURL: {{$credentials?.baseUrl}}/api`);
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: `Failed to delete record ${recordId}. URL: ${requestUrl}`,
 							});
@@ -464,7 +459,6 @@ export class Inveniordm implements INodeType {
 								},
 							);
 						} catch (error) {
-							console.log(`[DEBUG] Failed HTTP request - URL: ${requestUrl}, BaseURL: {{$credentials?.baseUrl}}/api`);
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: `Failed to get community ${communityId}. URL: ${requestUrl}`,
 							});
@@ -496,14 +490,11 @@ export class Inveniordm implements INodeType {
 									qs,
 								},
 							);
-						} catch (error) {
-							console.log(`[DEBUG] Failed HTTP request - URL: ${requestUrl}, Query params: ${JSON.stringify(qs)}, BaseURL: {{$credentials?.baseUrl}}/api`);
-							throw new NodeApiError(this.getNode(), error as JsonObject, {
-								message: `Failed to get communities. URL: ${requestUrl}`,
-							});
-						}
-
-						if (returnAll && (responseData as JsonObject).hits) {
+					} catch (error) {
+						throw new NodeApiError(this.getNode(), error as JsonObject, {
+							message: `Failed to get communities. URL: ${requestUrl}`,
+						});
+					}						if (returnAll && (responseData as JsonObject).hits) {
 							responseData = ((responseData as JsonObject).hits as JsonObject).hits as JsonObject[];
 						} else if ((responseData as JsonObject).hits) {
 							const hits = ((responseData as JsonObject).hits as JsonObject).hits as JsonObject[];
