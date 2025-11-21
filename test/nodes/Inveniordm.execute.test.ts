@@ -45,7 +45,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 				'inveniordmApi',
 				{
 					method: 'GET',
-					url: '/api/vocabularies/resourcetypes',
+					url: '/vocabularies/resourcetypes',
 				}
 			);
 		});
@@ -76,7 +76,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 
 			await expect(
 				node.methods!.loadOptions!.getResourceTypes.call(mockContext as any)
-			).rejects.toThrow('Failed to load resource types from /api/vocabularies/resourcetypes: Error: Network error');
+			).rejects.toThrow('Failed to load resource types from /vocabularies/resourcetypes: Error: Network error');
 		});
 	});
 
@@ -153,7 +153,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					'inveniordmApi',
 					{
 						method: 'GET',
-						url: '/api/records/123',
+						url: '/records/123',
 					}
 				);
 			});
@@ -187,7 +187,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					'inveniordmApi',
 					{
 						method: 'GET',
-						url: '/api/records',
+						url: '/records',
 						qs: {
 							q: 'test query',
 							sort: 'mostrecent',
@@ -247,7 +247,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					'inveniordmApi',
 					{
 						method: 'POST',
-						url: '/api/records',
+						url: '/records',
 						body: recordData,
 					}
 				);
@@ -278,7 +278,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					'inveniordmApi',
 					{
 						method: 'PUT',
-						url: '/api/records/123',
+						url: '/records/123',
 						body: recordData,
 					}
 				);
@@ -307,7 +307,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					'inveniordmApi',
 					{
 						method: 'DELETE',
-						url: '/api/records/123',
+						url: '/records/123',
 					}
 				);
 				expect(result).toEqual([[{ json: { success: true, id: '123' } }]]);
@@ -338,7 +338,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					'inveniordmApi',
 					{
 						method: 'GET',
-						url: '/api/communities/community-123',
+						url: '/communities/community-123',
 					}
 				);
 			});
@@ -372,7 +372,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					'inveniordmApi',
 					{
 						method: 'GET',
-						url: '/api/communities',
+						url: '/communities',
 						qs: {
 							q: 'science',
 							size: 5,

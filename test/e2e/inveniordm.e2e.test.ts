@@ -19,7 +19,7 @@ import { Inveniordm } from '../../nodes/inveniordm/Inveniordm.node';
 // Or modify these constants directly:
 // eslint-disable-next-line @n8n/community-nodes/no-restricted-globals
 const SHOULD_RUN_E2E = process.env.RUN_E2E_TESTS === 'true' || false; // Change to true to enable E2E tests
-const BASE_URL = 'https://inveniordm.web.cern.ch'; // Change to your InvenioRDM instance URL
+const BASE_URL = 'https://inveniordm.web.cern.ch/api'; // Change to your InvenioRDM instance URL
 const ACCESS_TOKEN = ''; // Add your access token here if needed
 
 // Skip E2E tests by default to avoid hitting real APIs in CI
