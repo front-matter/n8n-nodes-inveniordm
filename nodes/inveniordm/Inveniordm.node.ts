@@ -287,7 +287,7 @@ export class Inveniordm implements INodeType {
 		loadOptions: {
 			async getResourceTypes(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 				const returnData: INodePropertyOptions[] = [];
-				const requestUrl = '/vocabularies/resourcetypes';
+				const requestUrl = '/api/vocabularies/resourcetypes';
 				try {
 					const response = await this.helpers.httpRequestWithAuthentication.call(
 						this,
@@ -333,7 +333,7 @@ export class Inveniordm implements INodeType {
 							'inveniordmApi',
 							{
 								method: 'GET',
-								url: `/records/${recordId}`,
+								url: `/api/records/${recordId}`,
 							},
 						);
 					} else if (operation === 'getMany') {
@@ -352,7 +352,7 @@ export class Inveniordm implements INodeType {
 							qs.size = limit;
 						}
 
-					const requestUrl = '/records';
+					const requestUrl = '/api/records';
 					try {
 						responseData = await this.helpers.httpRequestWithAuthentication.call(
 							this,
@@ -383,7 +383,7 @@ export class Inveniordm implements INodeType {
 							throw new NodeOperationError(this.getNode(), 'Invalid JSON in Record Data field');
 						}
 
-						const requestUrl = '/records';
+						const requestUrl = '/api/records';
 						try {
 							responseData = await this.helpers.httpRequestWithAuthentication.call(
 								this,
@@ -410,7 +410,7 @@ export class Inveniordm implements INodeType {
 							throw new NodeOperationError(this.getNode(), 'Invalid JSON in Record Data field');
 						}
 
-						const requestUrl = `/records/${recordId}`;
+						const requestUrl = `/api/records/${recordId}`;
 						try {
 							responseData = await this.helpers.httpRequestWithAuthentication.call(
 								this,
@@ -428,7 +428,7 @@ export class Inveniordm implements INodeType {
 						}
 					} else if (operation === 'delete') {
 						const recordId = this.getNodeParameter('recordId', i) as string;
-						const requestUrl = `/records/${recordId}`;
+						const requestUrl = `/api/records/${recordId}`;
 						try {
 							await this.helpers.httpRequestWithAuthentication.call(
 								this,
@@ -447,8 +447,8 @@ export class Inveniordm implements INodeType {
 					}
 				} else if (resource === 'community') {
 					if (operation === 'get') {
-						const communityId = this.getNodeParameter('communityId', i) as string;
-						const requestUrl = `/communities/${communityId}`;
+				const communityId = this.getNodeParameter('communityId', i) as string;
+				const requestUrl = `/api/communities/${communityId}`;
 						try {
 							responseData = await this.helpers.httpRequestWithAuthentication.call(
 								this,
@@ -479,7 +479,7 @@ export class Inveniordm implements INodeType {
 							qs.size = limit;
 						}
 
-						const requestUrl = '/communities';
+						const requestUrl = '/api/communities';
 						try {
 							responseData = await this.helpers.httpRequestWithAuthentication.call(
 								this,
