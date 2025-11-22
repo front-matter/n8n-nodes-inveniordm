@@ -72,5 +72,17 @@ describe('InvenioRDMApi Credentials', () => {
       expect(credentials.test.request.url).toBe('/records');
       expect(credentials.test.request.method).toBe('GET');
     });
+
+    it('should require non-empty Base URL in credentials', () => {
+      const baseUrlProperty = credentials.properties.find((p: { name: string }) => p.name === 'baseUrl');
+      expect(baseUrlProperty).toBeDefined();
+      if (baseUrlProperty) {
+        // Default should point to a valid InvenioRDM API base URL
+        expect(typeof baseUrlProperty.default).toBe('string');
+        expect((baseUrlProperty.default as string).length).toBeGreaterThan(0);
+        // Basic sanity check that protocol is present
+        expect(baseUrlProperty.default).toContain('https://');
+      }
+    });
   });
 });

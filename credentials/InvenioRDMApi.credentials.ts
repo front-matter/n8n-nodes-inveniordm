@@ -21,6 +21,12 @@ export class InvenioRDMApi implements ICredentialType {
 			displayName: 'Base URL',
 			name: 'baseUrl',
 			type: 'string',
+			typeOptions: {
+        password: false,
+        multipleValues: false,
+        alwaysOpenEditWindow: true,
+        rows: 1,
+      },
 			default: 'https://inveniordm.web.cern.ch/api',
 			description: 'The base URL of your InvenioRDM instance including /api path (without trailing slash)',
 			placeholder: 'https://your-instance.org/api',

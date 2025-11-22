@@ -71,6 +71,10 @@ export class Inveniordm implements INodeType {
 				noDataExpression: true,
 				options: [
 					{
+						name: 'Ping',
+						value: 'ping',
+					},
+					{
 						name: 'Record',
 						value: 'record',
 					},
@@ -124,6 +128,26 @@ export class Inveniordm implements INodeType {
 					},
 				],
 				default: 'get',
+			},
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: {
+					show: {
+						resource: ['ping'],
+					},
+				},
+				options: [
+					{
+						name: 'Ping',
+						value: 'ping',
+						description: 'Check connectivity to InvenioRDM API',
+						action: 'Ping InvenioRDM API',
+					},
+				],
+				default: 'ping',
 			},
 			{
 				displayName: 'Operation',
@@ -252,8 +276,8 @@ export class Inveniordm implements INodeType {
 
 			// Community operations
 			{
-				displayName: 'Community ID',
-				name: 'communityId',
+				displayName: 'Community Slug',
+				name: 'communitySlug',
 				type: 'string',
 				required: true,
 				displayOptions: {
@@ -263,7 +287,7 @@ export class Inveniordm implements INodeType {
 					},
 				},
 				default: '',
-				description: 'The ID of the community',
+				description: 'The slug of the community',
 			},
 
 			// Create/Update record fields
@@ -287,14 +311,30 @@ export class Inveniordm implements INodeType {
 		loadOptions: {
 			async getResourceTypes(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 				const returnData: INodePropertyOptions[] = [];
-				const requestUrl = '/vocabularies/resourcetypes';
+
+				// Helper to fix common baseUrl typo
+				function normalizeBaseUrl(url: string | undefined): string | undefined {
+					if (!url) return url;
+					return url.replace(/^https:\s+\/\//i, 'https://');
+				}
+
+				function buildUrl(baseUrl: string | undefined, path: string): string {
+					const normalized = normalizeBaseUrl(baseUrl);
+					if (!normalized) return path;
+					return `${normalized.replace(/\/+$/, '')}${path}`;
+				}
+
+				const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string };
+				const requestPath = '/vocabularies/resourcetypes';
+				const fullUrl = buildUrl(creds.baseUrl, requestPath);
+
 				try {
 					const response = await this.helpers.httpRequestWithAuthentication.call(
 						this,
 						'inveniordmApi',
 						{
 							method: 'GET',
-							url: requestUrl,
+							url: fullUrl,
 						},
 					);
 
@@ -307,7 +347,7 @@ export class Inveniordm implements INodeType {
 						}
 					}
 				} catch (error) {
-					throw new NodeOperationError(this.getNode(), `Failed to load resource types from ${requestUrl}: ${error}`);
+					throw new NodeOperationError(this.getNode(), `Failed to load resource types from ${fullUrl}: ${error}`);
 				}
 				return returnData;
 			},
@@ -321,19 +361,66 @@ export class Inveniordm implements INodeType {
 		const resource = this.getNodeParameter('resource', 0);
 		const operation = this.getNodeParameter('operation', 0);
 
+		// Helper to fix common baseUrl typo: "https: //" → "https://"
+		function normalizeBaseUrl(url: string | undefined): string | undefined {
+			if (!url) return url;
+			return url.replace(/^https:\s+\/\//i, 'https://');
+		}
+
+		// Build full URL from baseUrl + path
+		function buildUrl(baseUrl: string | undefined, path: string): string {
+			const normalized = normalizeBaseUrl(baseUrl);
+			if (!normalized) return path;
+			return `${normalized.replace(/\/+$/, '')}${path}`;
+		}
+
 		for (let i = 0; i < items.length; i++) {
 			try {
 				let responseData: JsonObject | JsonObject[] | undefined;
 
-				if (resource === 'record') {
+				if (resource === 'ping') {
+					const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string };
+					const baseUrl = normalizeBaseUrl(creds.baseUrl);
+					const requestPath = '/ping';
+					const fullUrl = buildUrl(creds.baseUrl, requestPath);
+
+					this.logger.info('InvenioRDM ping request', {
+						baseUrl,
+						requestPath,
+						fullUrl,
+					});
+
+					await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'inveniordmApi',
+						{
+							method: 'GET',
+							url: fullUrl,
+						},
+					);
+					responseData = { message: 'OK' } as unknown as JsonObject;
+				} else if (resource === 'record') {
 					if (operation === 'get') {
+						const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string; accessToken?: string };
+						const baseUrl = normalizeBaseUrl(creds.baseUrl);
 						const recordId = this.getNodeParameter('recordId', i) as string;
+						const requestPath = `/records/${recordId}`;
+						const fullUrl = buildUrl(creds.baseUrl, requestPath);
+
+						this.logger.info('InvenioRDM record:get request', {
+							baseUrl,
+							accessToken: creds?.accessToken,
+							requestPath,
+							fullUrl,
+							recordId,
+						});
+
 						responseData = await this.helpers.httpRequestWithAuthentication.call(
 							this,
 							'inveniordmApi',
 							{
 								method: 'GET',
-								url: `/records/${recordId}`,
+								url: fullUrl,
 							},
 						);
 					} else if (operation === 'getMany') {
@@ -352,22 +439,25 @@ export class Inveniordm implements INodeType {
 							qs.size = limit;
 						}
 
-					const requestUrl = '/records';
-					try {
-						responseData = await this.helpers.httpRequestWithAuthentication.call(
-							this,
-							'inveniordmApi',
-							{
-								method: 'GET',
-								url: requestUrl,
-								qs,
-							},
-						);
-					} catch (error) {
-						throw new NodeApiError(this.getNode(), error as JsonObject, {
-							message: `Failed to get records. URL: ${requestUrl}`,
-						});
-					}						if (returnAll && (responseData as JsonObject).hits) {
+						const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string };
+						const requestPath = '/records';
+						const fullUrl = buildUrl(creds.baseUrl, requestPath);
+
+						try {
+							responseData = await this.helpers.httpRequestWithAuthentication.call(
+								this,
+								'inveniordmApi',
+								{
+									method: 'GET',
+									url: fullUrl,
+									qs,
+								},
+							);
+						} catch (error) {
+							throw new NodeApiError(this.getNode(), error as JsonObject, {
+								message: `Failed to get records. URL: ${fullUrl}`,
+							});
+						}						if (returnAll && (responseData as JsonObject).hits) {
 							responseData = ((responseData as JsonObject).hits as JsonObject).hits as JsonObject[];
 						} else if ((responseData as JsonObject).hits) {
 							const hits = ((responseData as JsonObject).hits as JsonObject).hits as JsonObject[];
@@ -383,20 +473,23 @@ export class Inveniordm implements INodeType {
 							throw new NodeOperationError(this.getNode(), 'Invalid JSON in Record Data field');
 						}
 
-						const requestUrl = '/records';
+						const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string };
+						const requestPath = '/records';
+						const fullUrl = buildUrl(creds.baseUrl, requestPath);
+
 						try {
 							responseData = await this.helpers.httpRequestWithAuthentication.call(
 								this,
 								'inveniordmApi',
 								{
 									method: 'POST',
-									url: requestUrl,
+									url: fullUrl,
 									body: parsedData,
 								},
 							);
 						} catch (error) {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
-								message: `Failed to create record. URL: ${requestUrl}`,
+								message: `Failed to create record. URL: ${fullUrl}`,
 							});
 						}
 					} else if (operation === 'update') {
@@ -410,57 +503,66 @@ export class Inveniordm implements INodeType {
 							throw new NodeOperationError(this.getNode(), 'Invalid JSON in Record Data field');
 						}
 
-						const requestUrl = `/records/${recordId}`;
+						const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string };
+						const requestPath = `/records/${recordId}`;
+						const fullUrl = buildUrl(creds.baseUrl, requestPath);
+
 						try {
 							responseData = await this.helpers.httpRequestWithAuthentication.call(
 								this,
 								'inveniordmApi',
 								{
 									method: 'PUT',
-									url: requestUrl,
+									url: fullUrl,
 									body: parsedData,
 								},
 							);
 						} catch (error) {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
-								message: `Failed to update record ${recordId}. URL: ${requestUrl}`,
+								message: `Failed to update record ${recordId}. URL: ${fullUrl}`,
 							});
 						}
 					} else if (operation === 'delete') {
-			const recordId = this.getNodeParameter('recordId', i) as string;
-				const requestUrl = `/records/${recordId}`;
+						const recordId = this.getNodeParameter('recordId', i) as string;
+						const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string };
+						const requestPath = `/records/${recordId}`;
+						const fullUrl = buildUrl(creds.baseUrl, requestPath);
+
 						try {
 							await this.helpers.httpRequestWithAuthentication.call(
 								this,
 								'inveniordmApi',
 								{
 									method: 'DELETE',
-									url: requestUrl,
+									url: fullUrl,
 								},
 							);
 						} catch (error) {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
-								message: `Failed to delete record ${recordId}. URL: ${requestUrl}`,
+								message: `Failed to delete record ${recordId}. URL: ${fullUrl}`,
 							});
 						}
 						responseData = { success: true, id: recordId };
 					}
 				} else if (resource === 'community') {
 					if (operation === 'get') {
-				const communityId = this.getNodeParameter('communityId', i) as string;
-					const requestUrl = `/communities/${communityId}`;
+						const communitySlug = this.getNodeParameter('communitySlug', i) as string;
+						const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string };
+						const requestPath = `/communities/${communitySlug}`;
+						const fullUrl = buildUrl(creds.baseUrl, requestPath);
+
 						try {
 							responseData = await this.helpers.httpRequestWithAuthentication.call(
 								this,
 								'inveniordmApi',
 								{
 									method: 'GET',
-									url: requestUrl,
+									url: fullUrl,
 								},
 							);
 						} catch (error) {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
-								message: `Failed to get community ${communityId}. URL: ${requestUrl}`,
+								message: `Failed to get community ${communitySlug}. URL: ${fullUrl}`,
 							});
 						}
 					} else if (operation === 'getMany') {
@@ -479,22 +581,25 @@ export class Inveniordm implements INodeType {
 							qs.size = limit;
 						}
 
-						const requestUrl = '/communities';
+						const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string };
+						const requestPath = '/communities';
+						const fullUrl = buildUrl(creds.baseUrl, requestPath);
+
 						try {
 							responseData = await this.helpers.httpRequestWithAuthentication.call(
 								this,
 								'inveniordmApi',
 								{
 									method: 'GET',
-									url: requestUrl,
+									url: fullUrl,
 									qs,
 								},
 							);
-					} catch (error) {
-						throw new NodeApiError(this.getNode(), error as JsonObject, {
-							message: `Failed to get communities. URL: ${requestUrl}`,
-						});
-					}						if (returnAll && (responseData as JsonObject).hits) {
+						} catch (error) {
+							throw new NodeApiError(this.getNode(), error as JsonObject, {
+								message: `Failed to get communities. URL: ${fullUrl}`,
+							});
+						}						if (returnAll && (responseData as JsonObject).hits) {
 							responseData = ((responseData as JsonObject).hits as JsonObject).hits as JsonObject[];
 						} else if ((responseData as JsonObject).hits) {
 							const hits = ((responseData as JsonObject).hits as JsonObject).hits as JsonObject[];

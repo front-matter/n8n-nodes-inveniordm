@@ -42,11 +42,14 @@ describeE2E('InvenioRDM Node - E2E Tests with Real APIs', () => {
 	describe('loadOptions - getResourceTypes with Real API', () => {
 		it('should fetch actual resource types from InvenioRDM Demo Site', async () => {
 			const mockContext = {
+				getCredentials: jest.fn().mockResolvedValue({ baseUrl: BASE_URL }),
 				helpers: {
 					httpRequestWithAuthentication: {
 						call: async (context: any, credentialType: string, requestOptions: any) => {
-							// Make real HTTP request
-							const url = `${BASE_URL}${requestOptions.url}`;
+							// Extract path from full URL if present, or use url directly
+							const url = requestOptions.url.startsWith('http') 
+								? requestOptions.url 
+								: `${BASE_URL}${requestOptions.url}`;
 							console.log(`📡 Fetching: ${url}`);
 							
 							const response = await fetch(url, {
@@ -94,10 +97,13 @@ describeE2E('InvenioRDM Node - E2E Tests with Real APIs', () => {
 				.mockReturnValueOnce(false)     // returnAll
 				.mockReturnValueOnce({}) // additionalFields - simplified to avoid query issues
 				.mockReturnValueOnce(3),        // limit - reduced for faster testing
+			getCredentials: jest.fn().mockResolvedValue({ baseUrl: BASE_URL }),
 			helpers: {
 				httpRequestWithAuthentication: {
 					call: async (context: any, credentialType: string, requestOptions: any) => {
-						const url = `${BASE_URL}${requestOptions.url}`;
+						const url = requestOptions.url.startsWith('http') 
+							? requestOptions.url 
+							: `${BASE_URL}${requestOptions.url}`;
 						const queryParams = new URLSearchParams(requestOptions.qs || {}).toString();
 						const fullUrl = queryParams ? `${url}?${queryParams}` : url;
 						
@@ -119,6 +125,9 @@ describeE2E('InvenioRDM Node - E2E Tests with Real APIs', () => {
 						return await response.json();
 					},
 				},
+			},
+			logger: {
+				info: jest.fn(),
 			},
 			getNode: jest.fn().mockReturnValue({ id: 'e2e-test-node' }),
 			continueOnFail: jest.fn().mockReturnValue(false),
@@ -151,10 +160,13 @@ describeE2E('InvenioRDM Node - E2E Tests with Real APIs', () => {
 					.mockReturnValueOnce('record')
 					.mockReturnValueOnce('get')
 					.mockReturnValueOnce(recordId),
+				getCredentials: jest.fn().mockResolvedValue({ baseUrl: BASE_URL }),
 				helpers: {
 					httpRequestWithAuthentication: {
 						call: async (context: any, credentialType: string, requestOptions: any) => {
-							const url = `${BASE_URL}${requestOptions.url}`;
+							const url = requestOptions.url.startsWith('http') 
+								? requestOptions.url 
+								: `${BASE_URL}${requestOptions.url}`;
 							console.log(`📡 Fetching specific record: ${url}`);
 							
 							const response = await fetch(url, {
@@ -169,6 +181,9 @@ describeE2E('InvenioRDM Node - E2E Tests with Real APIs', () => {
 							return await response.json();
 						},
 					},
+				},
+				logger: {
+					info: jest.fn(),
 				},
 				getNode: jest.fn(),
 				continueOnFail: jest.fn().mockReturnValue(false),
@@ -196,10 +211,13 @@ describeE2E('InvenioRDM Node - E2E Tests with Real APIs', () => {
 					.mockReturnValueOnce(false)       // returnAll
 					.mockReturnValueOnce({})          // additionalFields
 					.mockReturnValueOnce(3),          // limit
+				getCredentials: jest.fn().mockResolvedValue({ baseUrl: BASE_URL }),
 				helpers: {
 					httpRequestWithAuthentication: {
 						call: async (context: any, credentialType: string, requestOptions: any) => {
-							const url = `${BASE_URL}${requestOptions.url}`;
+							const url = requestOptions.url.startsWith('http') 
+								? requestOptions.url 
+								: `${BASE_URL}${requestOptions.url}`;
 							const queryParams = new URLSearchParams(requestOptions.qs || {}).toString();
 							const fullUrl = queryParams ? `${url}?${queryParams}` : url;
 							
@@ -217,6 +235,9 @@ describeE2E('InvenioRDM Node - E2E Tests with Real APIs', () => {
 							return await response.json();
 						},
 					},
+				},
+				logger: {
+					info: jest.fn(),
 				},
 				getNode: jest.fn().mockReturnValue({ id: 'e2e-test-node' }),
 				continueOnFail: jest.fn().mockReturnValue(false),
@@ -247,10 +268,13 @@ describeE2E('InvenioRDM Node - E2E Tests with Real APIs', () => {
 					.mockReturnValueOnce('record')
 					.mockReturnValueOnce('get')
 					.mockReturnValueOnce('non-existent-record-id-12345'),
+				getCredentials: jest.fn().mockResolvedValue({ baseUrl: BASE_URL }),
 				helpers: {
 					httpRequestWithAuthentication: {
 						call: async (context: any, credentialType: string, requestOptions: any) => {
-							const url = `${BASE_URL}${requestOptions.url}`;
+							const url = requestOptions.url.startsWith('http') 
+								? requestOptions.url 
+								: `${BASE_URL}${requestOptions.url}`;
 							
 							const response = await fetch(url, {
 								method: requestOptions.method,
@@ -264,6 +288,9 @@ describeE2E('InvenioRDM Node - E2E Tests with Real APIs', () => {
 							return await response.json();
 						},
 					},
+				},
+				logger: {
+					info: jest.fn(),
 				},
 				getNode: jest.fn().mockReturnValue({ id: 'e2e-test-node' }),
 				continueOnFail: jest.fn().mockReturnValue(false),
@@ -283,6 +310,7 @@ describeE2E('InvenioRDM Node - E2E Tests with Real APIs', () => {
 					.mockReturnValueOnce('record')
 					.mockReturnValueOnce('get')
 					.mockReturnValueOnce('test-id'),
+				getCredentials: jest.fn().mockResolvedValue({ baseUrl: BASE_URL }),
 				helpers: {
 					httpRequestWithAuthentication: {
 						call: async () => {
@@ -290,6 +318,9 @@ describeE2E('InvenioRDM Node - E2E Tests with Real APIs', () => {
 							throw new Error('Network timeout');
 						},
 					},
+				},
+				logger: {
+					info: jest.fn(),
 				},
 				getNode: jest.fn().mockReturnValue({ id: 'e2e-test-node' }),
 				continueOnFail: jest.fn().mockReturnValue(false),
@@ -315,10 +346,13 @@ describeE2E('InvenioRDM Node - E2E Tests with Real APIs', () => {
 					.mockReturnValueOnce(false)
 					.mockReturnValueOnce({})
 					.mockReturnValueOnce(2),
+				getCredentials: jest.fn().mockResolvedValue({ baseUrl: BASE_URL }),
 				helpers: {
 					httpRequestWithAuthentication: {
 						call: async (context: any, credentialType: string, requestOptions: any) => {
-							const url = `${BASE_URL}${requestOptions.url}`;
+							const url = requestOptions.url.startsWith('http') 
+								? requestOptions.url 
+								: `${BASE_URL}${requestOptions.url}`;
 							
 							const response = await fetch(url, {
 								method: requestOptions.method,
@@ -335,6 +369,9 @@ describeE2E('InvenioRDM Node - E2E Tests with Real APIs', () => {
 							return await response.json();
 						},
 					},
+				},
+				logger: {
+					info: jest.fn(),
 				},
 				getNode: jest.fn().mockReturnValue({ id: 'e2e-test-node' }),
 				continueOnFail: jest.fn().mockReturnValue(false),

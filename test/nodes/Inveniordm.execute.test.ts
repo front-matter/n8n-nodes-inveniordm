@@ -16,6 +16,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 
 		it('should process resource types response correctly', async () => {
 			const mockContext = {
+				getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 				helpers: {
 					httpRequestWithAuthentication: {
 						call: jest.fn().mockResolvedValue({
@@ -45,13 +46,14 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 				'inveniordmApi',
 				{
 					method: 'GET',
-					url: '/vocabularies/resourcetypes',
+					url: 'https://test.example.org/api/vocabularies/resourcetypes',
 				}
 			);
 		});
 
 		it('should handle empty response', async () => {
 			const mockContext = {
+				getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 				helpers: {
 					httpRequestWithAuthentication: {
 						call: jest.fn().mockResolvedValue({}),
@@ -66,6 +68,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 
 		it('should throw NodeOperationError on API failure', async () => {
 			const mockContext = {
+				getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 				helpers: {
 					httpRequestWithAuthentication: {
 						call: jest.fn().mockRejectedValue(new Error('Network error')),
@@ -76,7 +79,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 
 			await expect(
 				node.methods!.loadOptions!.getResourceTypes.call(mockContext as any)
-			).rejects.toThrow('Failed to load resource types from /vocabularies/resourcetypes: Error: Network error');
+			).rejects.toThrow('Failed to load resource types from https://test.example.org/api/vocabularies/resourcetypes: Error: Network error');
 		});
 	});
 
@@ -89,10 +92,14 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 						.mockReturnValueOnce('record')  // resource
 						.mockReturnValueOnce('get')     // operation  
 						.mockReturnValueOnce('test-id'), // recordId
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 					helpers: {
 						httpRequestWithAuthentication: {
 							call: jest.fn().mockResolvedValue({ id: 'test-id', title: 'Test' }),
 						},
+					},
+					logger: {
+						info: jest.fn(),
 					},
 					getNode: jest.fn(),
 					continueOnFail: jest.fn().mockReturnValue(false),
@@ -111,12 +118,16 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					getNodeParameter: jest.fn()
 						.mockReturnValueOnce('record').mockReturnValueOnce('get').mockReturnValueOnce('id1')
 						.mockReturnValueOnce('record').mockReturnValueOnce('get').mockReturnValueOnce('id2'),
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 					helpers: {
 						httpRequestWithAuthentication: {
 							call: jest.fn()
 								.mockResolvedValueOnce({ id: 'id1', title: 'Record 1' })
 								.mockResolvedValueOnce({ id: 'id2', title: 'Record 2' }),
 						},
+					},
+					logger: {
+						info: jest.fn(),
 					},
 					getNode: jest.fn(),
 					continueOnFail: jest.fn().mockReturnValue(false),
@@ -137,10 +148,14 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 						.mockReturnValueOnce('record')
 						.mockReturnValueOnce('get') 
 						.mockReturnValueOnce('123'),
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 					helpers: {
 						httpRequestWithAuthentication: {
 							call: jest.fn().mockResolvedValue({ id: '123' }),
 						},
+					},
+					logger: {
+						info: jest.fn(),
 					},
 					getNode: jest.fn(),
 					continueOnFail: jest.fn().mockReturnValue(false),
@@ -153,7 +168,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					'inveniordmApi',
 					{
 						method: 'GET',
-						url: '/records/123',
+						url: 'https://test.example.org/api/records/123',
 					}
 				);
 			});
@@ -167,6 +182,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 						.mockReturnValueOnce(false) // returnAll
 						.mockReturnValueOnce({ q: 'test query', sort: 'mostrecent' }) // additionalFields
 						.mockReturnValueOnce(10), // limit
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 					helpers: {
 						httpRequestWithAuthentication: {
 							call: jest.fn().mockResolvedValue({
@@ -175,6 +191,9 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 								}
 							}),
 						},
+					},
+					logger: {
+						info: jest.fn(),
 					},
 					getNode: jest.fn(),
 					continueOnFail: jest.fn().mockReturnValue(false),
@@ -187,7 +206,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					'inveniordmApi',
 					{
 						method: 'GET',
-						url: '/records',
+						url: 'https://test.example.org/api/records',
 						qs: {
 							q: 'test query',
 							sort: 'mostrecent',
@@ -205,6 +224,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 						.mockReturnValueOnce('getMany')
 						.mockReturnValueOnce(true) // returnAll
 						.mockReturnValueOnce({}), // additionalFields
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 					helpers: {
 						httpRequestWithAuthentication: {
 							call: jest.fn().mockResolvedValue({
@@ -213,6 +233,9 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 								}
 							}),
 						},
+					},
+					logger: {
+						info: jest.fn(),
 					},
 					getNode: jest.fn(),
 					continueOnFail: jest.fn().mockReturnValue(false),
@@ -231,10 +254,14 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 						.mockReturnValueOnce('record')
 						.mockReturnValueOnce('create')
 						.mockReturnValueOnce(JSON.stringify(recordData)),
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 					helpers: {
 						httpRequestWithAuthentication: {
 							call: jest.fn().mockResolvedValue({ id: '123', ...recordData }),
 						},
+					},
+					logger: {
+						info: jest.fn(),
 					},
 					getNode: jest.fn(),
 					continueOnFail: jest.fn().mockReturnValue(false),
@@ -247,7 +274,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					'inveniordmApi',
 					{
 						method: 'POST',
-						url: '/records',
+						url: 'https://test.example.org/api/records',
 						body: recordData,
 					}
 				);
@@ -262,10 +289,14 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 						.mockReturnValueOnce('update')
 						.mockReturnValueOnce('123')
 						.mockReturnValueOnce(JSON.stringify(recordData)),
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 					helpers: {
 						httpRequestWithAuthentication: {
 							call: jest.fn().mockResolvedValue({ id: '123', ...recordData }),
 						},
+					},
+					logger: {
+						info: jest.fn(),
 					},
 					getNode: jest.fn(),
 					continueOnFail: jest.fn().mockReturnValue(false),
@@ -278,7 +309,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					'inveniordmApi',
 					{
 						method: 'PUT',
-						url: '/records/123',
+						url: 'https://test.example.org/api/records/123',
 						body: recordData,
 					}
 				);
@@ -291,10 +322,14 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 						.mockReturnValueOnce('record')
 						.mockReturnValueOnce('delete')
 						.mockReturnValueOnce('123'),
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 					helpers: {
 						httpRequestWithAuthentication: {
 							call: jest.fn().mockResolvedValue(undefined),
 						},
+					},
+					logger: {
+						info: jest.fn(),
 					},
 					getNode: jest.fn(),
 					continueOnFail: jest.fn().mockReturnValue(false),
@@ -307,7 +342,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					'inveniordmApi',
 					{
 						method: 'DELETE',
-						url: '/records/123',
+						url: 'https://test.example.org/api/records/123',
 					}
 				);
 				expect(result).toEqual([[{ json: { success: true, id: '123' } }]]);
@@ -322,10 +357,14 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 						.mockReturnValueOnce('community')
 						.mockReturnValueOnce('get')
 						.mockReturnValueOnce('community-123'),
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 					helpers: {
 						httpRequestWithAuthentication: {
 							call: jest.fn().mockResolvedValue({ id: 'community-123' }),
 						},
+					},
+					logger: {
+						info: jest.fn(),
 					},
 					getNode: jest.fn(),
 					continueOnFail: jest.fn().mockReturnValue(false),
@@ -338,7 +377,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					'inveniordmApi',
 					{
 						method: 'GET',
-						url: '/communities/community-123',
+						url: 'https://test.example.org/api/communities/community-123',
 					}
 				);
 			});
@@ -352,6 +391,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 						.mockReturnValueOnce(false) // returnAll
 						.mockReturnValueOnce({ q: 'science' }) // additionalFields
 						.mockReturnValueOnce(5), // limit
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 					helpers: {
 						httpRequestWithAuthentication: {
 							call: jest.fn().mockResolvedValue({
@@ -360,6 +400,9 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 								}
 							}),
 						},
+					},
+					logger: {
+						info: jest.fn(),
 					},
 					getNode: jest.fn(),
 					continueOnFail: jest.fn().mockReturnValue(false),
@@ -372,7 +415,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					'inveniordmApi',
 					{
 						method: 'GET',
-						url: '/communities',
+						url: 'https://test.example.org/api/communities',
 						qs: {
 							q: 'science',
 							size: 5,
@@ -390,10 +433,14 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 						.mockReturnValueOnce('record')
 						.mockReturnValueOnce('create')
 						.mockReturnValueOnce('{ invalid json syntax }'), // Invalid JSON
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 					helpers: {
 						httpRequestWithAuthentication: {
 							call: jest.fn(),
 						},
+					},
+					logger: {
+						info: jest.fn(),
 					},
 					getNode: jest.fn(),
 					continueOnFail: jest.fn().mockReturnValue(false),
@@ -409,10 +456,14 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 						.mockReturnValueOnce('record')
 						.mockReturnValueOnce('get')
 						.mockReturnValueOnce('123'),
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 					helpers: {
 						httpRequestWithAuthentication: {
 							call: jest.fn().mockRejectedValue(new Error('API Error')),
 						},
+					},
+					logger: {
+						info: jest.fn(),
 					},
 					getNode: jest.fn(),
 					continueOnFail: jest.fn().mockReturnValue(true),
@@ -434,10 +485,14 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 						.mockReturnValueOnce('record')
 						.mockReturnValueOnce('get')
 						.mockReturnValueOnce('123'),
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 					helpers: {
 						httpRequestWithAuthentication: {
 							call: jest.fn().mockResolvedValue(arrayData),
 						},
+					},
+					logger: {
+						info: jest.fn(),
 					},
 					getNode: jest.fn(),
 					continueOnFail: jest.fn().mockReturnValue(false),
@@ -469,10 +524,14 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 						.mockReturnValueOnce(false) // returnAll
 						.mockReturnValueOnce({}) // additionalFields
 						.mockReturnValueOnce(2), // limit
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 					helpers: {
 						httpRequestWithAuthentication: {
 							call: jest.fn().mockResolvedValue(mockResponse),
 						},
+					},
+					logger: {
+						info: jest.fn(),
 					},
 					getNode: jest.fn(),
 					continueOnFail: jest.fn().mockReturnValue(false),
