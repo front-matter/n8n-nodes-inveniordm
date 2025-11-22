@@ -57,7 +57,7 @@ export class Inveniordm implements INodeType {
 			},
 		],
 		requestDefaults: {
-			baseURL: '={{$credentials?.baseUrl}}/api',
+			baseURL: '={{$credentials?.baseUrl}}',
 			headers: {
 				Accept: 'application/json',
 				'Content-Type': 'application/json',
@@ -427,8 +427,8 @@ export class Inveniordm implements INodeType {
 							});
 						}
 					} else if (operation === 'delete') {
-						const recordId = this.getNodeParameter('recordId', i) as string;
-						const requestUrl = `/records/${recordId}`;
+			const recordId = this.getNodeParameter('recordId', i) as string;
+				const requestUrl = `/records/${recordId}`;
 						try {
 							await this.helpers.httpRequestWithAuthentication.call(
 								this,

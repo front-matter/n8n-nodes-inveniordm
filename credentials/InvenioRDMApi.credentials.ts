@@ -21,9 +21,9 @@ export class InvenioRDMApi implements ICredentialType {
 			displayName: 'Base URL',
 			name: 'baseUrl',
 			type: 'string',
-			default: 'https://inveniordm.web.cern.ch',
-			description: 'The base URL of your InvenioRDM instance (without trailing slash)',
-			placeholder: 'https://your-instance.org',
+			default: 'https://inveniordm.web.cern.ch/api',
+			description: 'The base URL of your InvenioRDM instance including /api path (without trailing slash)',
+			placeholder: 'https://your-instance.org/api',
 			required: true,
 		},
 		{
@@ -50,7 +50,7 @@ export class InvenioRDMApi implements ICredentialType {
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: '={{$credentials?.baseUrl}}',
-			url: '/api/records',
+			url: '/records',
 			method: 'GET',
 			qs: {
 				size: 1,

@@ -181,7 +181,7 @@ npm run test:e2e
    When encountering "invalid URL" errors during node execution, the node now includes comprehensive debug logging:
    
    ```
-   [DEBUG] Failed HTTP request - URL: /records/123, BaseURL: {{$credentials?.baseUrl}}/api, Full URL would be: {{$credentials?.baseUrl}}/api/records/123
+   [DEBUG] Failed HTTP request - URL: /records/123, BaseURL: {{$credentials?.baseUrl}}/api, Full URL would be: {{$credentials?.baseUrl}}/records/123
    ```
    
    **Debugging Steps:**
@@ -189,12 +189,3 @@ npm run test:e2e
    - Verify the credential configuration is correct
    - Look for debug logs in the n8n console output
    - Ensure the InvenioRDM instance is accessible at the configured URL
-
-## Future Improvements
-
-- [ ] Increase integration test coverage
-- [ ] Add performance benchmarks
-- [ ] Implement visual regression testing
-- [ ] Add mutation testing
-- [ ] Create test data factories
-- [ ] Add API contract testing

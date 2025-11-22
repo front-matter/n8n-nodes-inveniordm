@@ -17,7 +17,7 @@ npm run test:e2e
 Edit `test/e2e/inveniordm.e2e.test.ts` and change:
 ```typescript
 const SHOULD_RUN_E2E = false; // Change to true
-const BASE_URL = 'https://inveniordm.web.cern.ch'; // Change to your InvenioRDM URL
+const BASE_URL = 'https://inveniordm.web.cern.ch/api'; // Change to your InvenioRDM URL
 const ACCESS_TOKEN = ''; // Add your access token (optional)
 ```
 
@@ -44,10 +44,10 @@ The E2E tests cover the following scenarios:
 ## Test Configuration
 
 ### Default URLs
-- **InvenioRDM Demo Site** (Default): `https://inveniordm.web.cern.ch`
-- **Zenodo Production**: `https://zenodo.org`
-- **Zenodo Sandbox**: `https://sandbox.zenodo.org`
-- **Local Instance**: `http://localhost:5000`
+- **InvenioRDM Demo Site** (Default): `https://inveniordm.web.cern.ch/api`
+- **Zenodo Production**: `https://zenodo.org/api`
+- **Zenodo Sandbox**: `https://sandbox.zenodo.org/api`
+- **Local Instance**: `http://localhost:5000/api`
 
 ### Access Token
 An access token is only required for authenticated operations (if implemented). Most read-only operations work without a token.
@@ -65,10 +65,10 @@ An access token is only required for authenticated operations (if implemented). 
 RUN_E2E_TESTS=true npm run test:e2e
 
 # Against another InvenioRDM instance
-RUN_E2E_TESTS=true INVENIORDM_BASE_URL=https://zenodo.org npm run test:e2e
+RUN_E2E_TESTS=true INVENIORDM_BASE_URL=https://zenodo.org/api npm run test:e2e
 
 # Specifically for InvenioRDM Demo Site
-RUN_E2E_TESTS=true INVENIORDM_BASE_URL=https://inveniordm.web.cern.ch npm run test:e2e
+RUN_E2E_TESTS=true INVENIORDM_BASE_URL=https://inveniordm.web.cern.ch/api npm run test:e2e
 
 # With access token for authenticated tests
 RUN_E2E_TESTS=true INVENIORDM_ACCESS_TOKEN=your_token npm run test:e2e
@@ -76,11 +76,11 @@ RUN_E2E_TESTS=true INVENIORDM_ACCESS_TOKEN=your_token npm run test:e2e
 
 ## Instance-Specific Notes
 
-### InvenioRDM Demo Site (https://inveniordm.web.cern.ch)
-- ✅ **Get Resource Types** works (`/api/vocabularies/resourcetypes` - 25 types)
-- ✅ **Get Single Records** works (`/api/records/{id}`)
-- ✅ **Get Communities** works (`/api/communities` - 3 communities)
-- ✅ **Get Multiple Records** works (`/api/records` - 3 records fetched successfully)
+### InvenioRDM Demo Site (https://inveniordm.web.cern.ch/api)
+- ✅ **Get Resource Types** works (`/vocabularies/resourcetypes` - 25 types)
+- ✅ **Get Single Records** works (`/records/{id}`)
+- ✅ **Get Communities** works (`/communities` - 3 communities)
+- ✅ **Get Multiple Records** works (`/records` - 3 records fetched successfully)
 
 ## Troubleshooting
 

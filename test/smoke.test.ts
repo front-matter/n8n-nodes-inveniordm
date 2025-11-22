@@ -28,7 +28,7 @@ describe('Basic Smoke Tests', () => {
 
     it('should have test configuration', () => {
       const credentials = new InvenioRDMApi();
-      expect(credentials.test.request.url).toBe('/api/records');
+      expect(credentials.test.request.url).toBe('/records');
       expect(credentials.test.request.method).toBe('GET');
     });
   });

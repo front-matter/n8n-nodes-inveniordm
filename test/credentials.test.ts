@@ -69,7 +69,7 @@ describe('InvenioRDMApi Credentials', () => {
   describe('Test Configuration', () => {
     it('should have correct test request configuration', () => {
       expect(credentials.test.request.baseURL).toBe('={{$credentials?.baseUrl}}');
-      expect(credentials.test.request.url).toBe('/api/records');
+      expect(credentials.test.request.url).toBe('/records');
       expect(credentials.test.request.method).toBe('GET');
     });
   });
