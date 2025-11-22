@@ -144,7 +144,7 @@ export class Inveniordm implements INodeType {
 						name: 'Ping',
 						value: 'ping',
 						description: 'Check connectivity to InvenioRDM API',
-						action: 'Ping InvenioRDM API',
+						action: 'Ping invenio rdm api',
 					},
 				],
 				default: 'ping',
