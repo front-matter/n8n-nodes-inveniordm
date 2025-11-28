@@ -12,9 +12,14 @@ import type {
 import { NodeApiError, NodeOperationError } from 'n8n-workflow';
 
 interface QueryParameters extends IDataObject {
-	q?: string;
-	sort?: string;
-	size?: number;
+	q?: string;  // search query string
+  sort?: string;
+  size?: number;
+  page?: number;
+  f?: string;  // filter, e.g., language:eng
+  l?: string;  // list format
+  p?: number;  // page number (alternative to page)
+  s?: number;  // size (alternative to size)
 }
 
 interface RecordData {
@@ -32,7 +37,13 @@ interface RecordData {
 		resource_type: {
 			id: string;
 		};
+    publication_date: string;
 	};
+}
+
+interface InvenioRDMCredentials {
+	baseUrl?: string;
+	accessToken?: string;
 }
 
 export class Inveniordm implements INodeType {
@@ -172,6 +183,12 @@ export class Inveniordm implements INodeType {
 						description: 'Get many communities',
 						action: 'Get many communities',
 					},
+					{
+						name: 'Get Records',
+						value: 'getRecords',
+						description: 'Get records from a community',
+						action: 'Get records from a community',
+					},
 				],
 				default: 'get',
 			},
@@ -198,7 +215,7 @@ export class Inveniordm implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['record', 'community'],
-						operation: ['getMany'],
+						operation: ['getMany', 'getRecords'],
 					},
 				},
 				default: false,
@@ -211,7 +228,7 @@ export class Inveniordm implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['record', 'community'],
-						operation: ['getMany'],
+						operation: ['getMany', 'getRecords'],
 						returnAll: [false],
 					},
 				},
@@ -230,7 +247,7 @@ export class Inveniordm implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['record', 'community'],
-						operation: ['getMany'],
+						operation: ['getMany', 'getRecords'],
 					},
 				},
 				default: {},
@@ -251,46 +268,87 @@ export class Inveniordm implements INodeType {
 								name: 'Best Match',
 								value: 'bestmatch',
 							},
-							{
-								name: 'Most Downloaded',
-								value: 'mostdownloaded',
+              {
+								name: 'Least Recently Added',
+								value: 'created-asc',
 							},
-							{
-								name: 'Most Recent',
-								value: 'mostrecent',
+              {
+								name: 'Least Recently Updated',
+								value: 'updated-asc',
 							},
 							{
 								name: 'Most Viewed',
 								value: 'mostviewed',
 							},
+              {
+								name: 'Newest',
+								value: 'newest',
+							},
 							{
 								name: 'Oldest',
 								value: 'oldest',
+							},
+              {
+								name: 'Recently Added',
+								value: 'created-desc',
+							},
+              {
+								name: 'Recently Updated',
+								value: 'updated-desc',
 							},
 						],
 						default: 'bestmatch',
 						description: 'Sort order for results',
 					},
+          {
+						displayName: 'Page',
+						name: 'p',
+						type: 'number',
+						default: 1,
+						description: 'Page number for paginated results',
+					},
+          {
+						displayName: 'Language',
+						name: 'f',
+						type: 'options',
+						options: [
+              {
+                name: 'English',
+                value: 'language:eng',
+              },
+              {
+                name: 'French',
+                value: 'language:fra',
+              },
+              {
+                name: 'German',
+                value: 'language:deu',
+              },
+              {
+                name: 'Spanish',
+                value: 'language:spa',
+              },
+						],
+						default: 'language:eng',
+					},
 				],
 			},
 
-			// Community operations
-			{
-				displayName: 'Community Slug',
-				name: 'communitySlug',
-				type: 'string',
-				required: true,
-				displayOptions: {
-					show: {
-						resource: ['community'],
-						operation: ['get'],
-					},
+		// Community operations
+		{
+			displayName: 'Community Slug',
+			name: 'communitySlug',
+			type: 'string',
+			required: true,
+			displayOptions: {
+				show: {
+					resource: ['community'],
+					operation: ['get', 'getRecords'],
 				},
-				default: '',
-				description: 'The slug of the community',
 			},
-
-			// Create/Update record fields
+			default: '',
+			description: 'The slug of the community',
+		},			// Create/Update record fields
 			{
 				displayName: 'Record Data',
 				name: 'recordData',
@@ -324,7 +382,7 @@ export class Inveniordm implements INodeType {
 					return `${normalized.replace(/\/+$/, '')}${path}`;
 				}
 
-				const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string };
+				const creds = (await this.getCredentials('inveniordmApi')) as InvenioRDMCredentials;
 				const requestPath = '/vocabularies/resourcetypes';
 				const fullUrl = buildUrl(creds.baseUrl, requestPath);
 
@@ -374,12 +432,22 @@ export class Inveniordm implements INodeType {
 			return `${normalized.replace(/\/+$/, '')}${path}`;
 		}
 
+		// Build full URL with query parameters
+		function buildUrlWithParams(baseUrl: string | undefined, path: string, params: QueryParameters): string {
+			const url = buildUrl(baseUrl, path);
+			const queryString = Object.entries(params)
+				.filter(([, value]) => value !== undefined && value !== null && value !== '')
+				.map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+				.join('&');
+			return queryString ? `${url}?${queryString}` : url;
+		}
+
 		for (let i = 0; i < items.length; i++) {
 			try {
 				let responseData: JsonObject | JsonObject[] | undefined;
 
 				if (resource === 'ping') {
-					const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string };
+					const creds = (await this.getCredentials('inveniordmApi')) as InvenioRDMCredentials;
 					const baseUrl = normalizeBaseUrl(creds.baseUrl);
 					const requestPath = '/ping';
 					const fullUrl = buildUrl(creds.baseUrl, requestPath);
@@ -401,7 +469,7 @@ export class Inveniordm implements INodeType {
 					responseData = { message: 'OK' } as unknown as JsonObject;
 				} else if (resource === 'record') {
 					if (operation === 'get') {
-						const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string; accessToken?: string };
+						const creds = (await this.getCredentials('inveniordmApi')) as InvenioRDMCredentials;
 						const baseUrl = normalizeBaseUrl(creds.baseUrl);
 						const recordId = this.getNodeParameter('recordId', i) as string;
 						const requestPath = `/records/${recordId}`;
@@ -424,24 +492,29 @@ export class Inveniordm implements INodeType {
 							},
 						);
 					} else if (operation === 'getMany') {
-						const returnAll = this.getNodeParameter('returnAll', i);
-						const additionalFields = this.getNodeParameter('additionalFields', i) as {
-							q?: string;
-							sort?: string;
-						};
-
-						const qs: QueryParameters = {};
+					const returnAll = this.getNodeParameter('returnAll', i);
+					const additionalFields = this.getNodeParameter('additionalFields', i) as {
+						q?: string;
+						sort?: string;
+              page?: number;
+              f?: string;
+					};						const qs: QueryParameters = {};
 						if (additionalFields.q) qs.q = additionalFields.q;
 						if (additionalFields.sort) qs.sort = additionalFields.sort;
+            if (additionalFields.page) qs.page = additionalFields.page;
+            if (additionalFields.f) qs.f = additionalFields.f;
 
 						if (!returnAll) {
 							const limit = this.getNodeParameter('limit', i) as number;
 							qs.size = limit;
 						}
 
-						const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string };
+						const creds = (await this.getCredentials('inveniordmApi')) as InvenioRDMCredentials;
 						const requestPath = '/records';
-						const fullUrl = buildUrl(creds.baseUrl, requestPath);
+						const fullUrl = buildUrlWithParams(creds.baseUrl, requestPath, qs);
+            this.logger.info('InvenioRDM record:get many request', {
+							fullUrl,
+						});
 
 						try {
 							responseData = await this.helpers.httpRequestWithAuthentication.call(
@@ -450,7 +523,6 @@ export class Inveniordm implements INodeType {
 								{
 									method: 'GET',
 									url: fullUrl,
-									qs,
 								},
 							);
 						} catch (error) {
@@ -473,7 +545,7 @@ export class Inveniordm implements INodeType {
 							throw new NodeOperationError(this.getNode(), 'Invalid JSON in Record Data field');
 						}
 
-						const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string };
+						const creds = (await this.getCredentials('inveniordmApi')) as InvenioRDMCredentials;
 						const requestPath = '/records';
 						const fullUrl = buildUrl(creds.baseUrl, requestPath);
 
@@ -503,7 +575,7 @@ export class Inveniordm implements INodeType {
 							throw new NodeOperationError(this.getNode(), 'Invalid JSON in Record Data field');
 						}
 
-						const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string };
+						const creds = (await this.getCredentials('inveniordmApi')) as InvenioRDMCredentials;
 						const requestPath = `/records/${recordId}`;
 						const fullUrl = buildUrl(creds.baseUrl, requestPath);
 
@@ -524,7 +596,7 @@ export class Inveniordm implements INodeType {
 						}
 					} else if (operation === 'delete') {
 						const recordId = this.getNodeParameter('recordId', i) as string;
-						const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string };
+						const creds = (await this.getCredentials('inveniordmApi')) as InvenioRDMCredentials;
 						const requestPath = `/records/${recordId}`;
 						const fullUrl = buildUrl(creds.baseUrl, requestPath);
 
@@ -547,7 +619,7 @@ export class Inveniordm implements INodeType {
 				} else if (resource === 'community') {
 					if (operation === 'get') {
 						const communitySlug = this.getNodeParameter('communitySlug', i) as string;
-						const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string };
+						const creds = (await this.getCredentials('inveniordmApi')) as InvenioRDMCredentials;
 						const requestPath = `/communities/${communitySlug}`;
 						const fullUrl = buildUrl(creds.baseUrl, requestPath);
 
@@ -581,9 +653,9 @@ export class Inveniordm implements INodeType {
 							qs.size = limit;
 						}
 
-						const creds = (await this.getCredentials('inveniordmApi')) as { baseUrl?: string };
+						const creds = (await this.getCredentials('inveniordmApi')) as InvenioRDMCredentials;
 						const requestPath = '/communities';
-						const fullUrl = buildUrl(creds.baseUrl, requestPath);
+						const fullUrl = buildUrlWithParams(creds.baseUrl, requestPath, qs);
 
 						try {
 							responseData = await this.helpers.httpRequestWithAuthentication.call(
@@ -592,7 +664,6 @@ export class Inveniordm implements INodeType {
 								{
 									method: 'GET',
 									url: fullUrl,
-									qs,
 								},
 							);
 						} catch (error) {
@@ -604,6 +675,56 @@ export class Inveniordm implements INodeType {
 						} else if ((responseData as JsonObject).hits) {
 							const hits = ((responseData as JsonObject).hits as JsonObject).hits as JsonObject[];
 							responseData = hits.slice(0, qs.size || 50);
+						}
+					} else if (operation === 'getRecords') {
+						const communitySlug = this.getNodeParameter('communitySlug', i) as string;
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i) as {
+							q?: string;
+							sort?: string;
+						};
+
+						const qs: QueryParameters = {
+							l: 'list',
+							p: 1,
+						};
+						if (additionalFields.q) qs.q = additionalFields.q;
+						if (additionalFields.sort) {
+							qs.sort = additionalFields.sort;
+						} else {
+							qs.sort = 'newest';
+						}
+
+						if (!returnAll) {
+							const limit = this.getNodeParameter('limit', i) as number;
+							qs.s = limit;
+						} else {
+							qs.s = 10;
+						}
+
+						const creds = (await this.getCredentials('inveniordmApi')) as InvenioRDMCredentials;
+						const requestPath = `/communities/${communitySlug}/records`;
+						const fullUrl = buildUrlWithParams(creds.baseUrl, requestPath, qs);
+
+						try {
+							responseData = await this.helpers.httpRequestWithAuthentication.call(
+								this,
+								'inveniordmApi',
+								{
+									method: 'GET',
+									url: fullUrl,
+								},
+							);
+						} catch (error) {
+							throw new NodeApiError(this.getNode(), error as JsonObject, {
+								message: `Failed to get records from community ${communitySlug}. URL: ${fullUrl}`,
+							});
+						}
+						if (returnAll && (responseData as JsonObject).hits) {
+							responseData = ((responseData as JsonObject).hits as JsonObject).hits as JsonObject[];
+						} else if ((responseData as JsonObject).hits) {
+							const hits = ((responseData as JsonObject).hits as JsonObject).hits as JsonObject[];
+							responseData = hits.slice(0, qs.s || 10);
 						}
 					}
 				}

@@ -180,7 +180,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 						.mockReturnValueOnce('record')
 						.mockReturnValueOnce('getMany')
 						.mockReturnValueOnce(false) // returnAll
-						.mockReturnValueOnce({ q: 'test query', sort: 'mostrecent' }) // additionalFields
+						.mockReturnValueOnce({ q: 'test query', sort: 'newest' }) // additionalFields
 						.mockReturnValueOnce(10), // limit
 					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
 					helpers: {
@@ -206,12 +206,7 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					'inveniordmApi',
 					{
 						method: 'GET',
-						url: 'https://test.example.org/api/records',
-						qs: {
-							q: 'test query',
-							sort: 'mostrecent',
-							size: 10,
-						},
+						url: 'https://test.example.org/api/records?q=test%20query&sort=newest&size=10',
 					}
 				);
 			});
@@ -415,12 +410,125 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 					'inveniordmApi',
 					{
 						method: 'GET',
-						url: 'https://test.example.org/api/communities',
-						qs: {
-							q: 'science',
-							size: 5,
-						},
+						url: 'https://test.example.org/api/communities?q=science&size=5',
 					}
+				);
+			});
+
+			it('should construct correct GET request for community getRecords operation', async () => {
+				const mockContext = {
+					getInputData: jest.fn().mockReturnValue([{ json: {} }]),
+					getNodeParameter: jest.fn()
+						.mockReturnValueOnce('community')
+						.mockReturnValueOnce('getRecords')
+						.mockReturnValueOnce('front_matter')
+						.mockReturnValueOnce(false) // returnAll
+						.mockReturnValueOnce({ q: 'test', sort: 'newest' }) // additionalFields
+						.mockReturnValueOnce(10), // limit
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
+					helpers: {
+						httpRequestWithAuthentication: {
+							call: jest.fn().mockResolvedValue({
+								hits: {
+									hits: Array(3).fill(null).map((_, i) => ({ id: i, title: `Record ${i}` }))
+								}
+							}),
+						},
+					},
+					logger: {
+						info: jest.fn(),
+					},
+					getNode: jest.fn(),
+					continueOnFail: jest.fn().mockReturnValue(false),
+				};
+
+				await node.execute.call(mockContext as any);
+
+				expect(mockContext.helpers.httpRequestWithAuthentication.call).toHaveBeenCalledWith(
+					mockContext,
+					'inveniordmApi',
+					{
+						method: 'GET',
+						url: 'https://test.example.org/api/communities/front_matter/records?l=list&p=1&q=test&sort=newest&s=10',
+					}
+				);
+			});
+
+			it('should use default sort for community getRecords when not specified', async () => {
+				const mockContext = {
+					getInputData: jest.fn().mockReturnValue([{ json: {} }]),
+					getNodeParameter: jest.fn()
+						.mockReturnValueOnce('community')
+						.mockReturnValueOnce('getRecords')
+						.mockReturnValueOnce('front_matter')
+						.mockReturnValueOnce(false) // returnAll
+						.mockReturnValueOnce({}) // additionalFields - no sort
+						.mockReturnValueOnce(5), // limit
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
+					helpers: {
+						httpRequestWithAuthentication: {
+							call: jest.fn().mockResolvedValue({
+								hits: {
+									hits: Array(2).fill(null).map((_, i) => ({ id: i, title: `Record ${i}` }))
+								}
+							}),
+						},
+					},
+					logger: {
+						info: jest.fn(),
+					},
+					getNode: jest.fn(),
+					continueOnFail: jest.fn().mockReturnValue(false),
+				};
+
+				await node.execute.call(mockContext as any);
+
+				expect(mockContext.helpers.httpRequestWithAuthentication.call).toHaveBeenCalledWith(
+					mockContext,
+					'inveniordmApi',
+					{
+						method: 'GET',
+						url: 'https://test.example.org/api/communities/front_matter/records?l=list&p=1&sort=newest&s=5',
+					}
+				);
+			});
+
+			it('should handle returnAll=true for community getRecords', async () => {
+				const mockContext = {
+					getInputData: jest.fn().mockReturnValue([{ json: {} }]),
+					getNodeParameter: jest.fn()
+						.mockReturnValueOnce('community')
+						.mockReturnValueOnce('getRecords')
+						.mockReturnValueOnce('front_matter')
+						.mockReturnValueOnce(true) // returnAll
+						.mockReturnValueOnce({}), // additionalFields
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
+					helpers: {
+						httpRequestWithAuthentication: {
+							call: jest.fn().mockResolvedValue({
+								hits: {
+									hits: Array(15).fill(null).map((_, i) => ({ id: i, title: `Record ${i}` }))
+								}
+							}),
+						},
+					},
+					logger: {
+						info: jest.fn(),
+					},
+					getNode: jest.fn(),
+					continueOnFail: jest.fn().mockReturnValue(false),
+				};
+
+				const result = await node.execute.call(mockContext as any);
+
+				expect(result[0]).toHaveLength(15); // All returned when returnAll=true
+				expect(mockContext.helpers.httpRequestWithAuthentication.call).toHaveBeenCalledWith(
+					mockContext,
+					'inveniordmApi',
+					expect.objectContaining({
+						method: 'GET',
+						url: expect.stringContaining('s=10'), // Default size when returnAll
+					})
 				);
 			});
 		});
