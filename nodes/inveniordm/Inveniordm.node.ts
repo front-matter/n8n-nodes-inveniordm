@@ -253,6 +253,44 @@ export class Inveniordm implements INodeType {
 				default: {},
 				options: [
 					{
+						displayName: 'Featured',
+						name: 'featured',
+						type: 'boolean',
+						default: false,
+						description: 'Whether the record is featured',
+					},
+		  {
+						displayName: 'Language',
+						name: 'language',
+						type: 'options',
+						options: [
+			  {
+				name: 'English',
+				value: 'eng',
+			  },
+			  {
+				name: 'French',
+				value: 'fra',
+			  },
+			  {
+				name: 'German',
+				value: 'deu',
+			  },
+			  {
+				name: 'Spanish',
+				value: 'spa',
+			  },
+						],
+						default: 'eng',
+					},
+		  {
+						displayName: 'Page',
+						name: 'p',
+						type: 'number',
+						default: 1,
+						description: 'Page number for paginated results',
+					},
+					{
 						displayName: 'Query',
 						name: 'q',
 						type: 'string',
@@ -268,11 +306,11 @@ export class Inveniordm implements INodeType {
 								name: 'Best Match',
 								value: 'bestmatch',
 							},
-              {
+			  {
 								name: 'Least Recently Added',
 								value: 'created-asc',
 							},
-              {
+			  {
 								name: 'Least Recently Updated',
 								value: 'updated-asc',
 							},
@@ -280,7 +318,7 @@ export class Inveniordm implements INodeType {
 								name: 'Most Viewed',
 								value: 'mostviewed',
 							},
-              {
+			  {
 								name: 'Newest',
 								value: 'newest',
 							},
@@ -288,48 +326,17 @@ export class Inveniordm implements INodeType {
 								name: 'Oldest',
 								value: 'oldest',
 							},
-              {
+			  {
 								name: 'Recently Added',
 								value: 'created-desc',
 							},
-              {
+			  {
 								name: 'Recently Updated',
 								value: 'updated-desc',
 							},
 						],
 						default: 'bestmatch',
 						description: 'Sort order for results',
-					},
-          {
-						displayName: 'Page',
-						name: 'p',
-						type: 'number',
-						default: 1,
-						description: 'Page number for paginated results',
-					},
-          {
-						displayName: 'Language',
-						name: 'f',
-						type: 'options',
-						options: [
-              {
-                name: 'English',
-                value: 'language:eng',
-              },
-              {
-                name: 'French',
-                value: 'language:fra',
-              },
-              {
-                name: 'German',
-                value: 'language:deu',
-              },
-              {
-                name: 'Spanish',
-                value: 'language:spa',
-              },
-						],
-						default: 'language:eng',
 					},
 				],
 			},
