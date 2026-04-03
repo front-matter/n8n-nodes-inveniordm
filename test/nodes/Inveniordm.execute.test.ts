@@ -211,6 +211,44 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 				);
 			});
 
+			it('should include featured=true in getMany query parameters', async () => {
+				const mockContext = {
+					getInputData: jest.fn().mockReturnValue([{ json: {} }]),
+					getNodeParameter: jest.fn()
+						.mockReturnValueOnce('record')
+						.mockReturnValueOnce('getMany')
+						.mockReturnValueOnce(false) // returnAll
+						.mockReturnValueOnce({ featured: true }) // additionalFields
+						.mockReturnValueOnce(10), // limit
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
+					helpers: {
+						httpRequestWithAuthentication: {
+							call: jest.fn().mockResolvedValue({
+								hits: {
+									hits: Array(2).fill(null).map((_, i) => ({ id: i, title: `Record ${i}` }))
+								}
+							}),
+						},
+					},
+					logger: {
+						info: jest.fn(),
+					},
+					getNode: jest.fn(),
+					continueOnFail: jest.fn().mockReturnValue(false),
+				};
+
+				await node.execute.call(mockContext as any);
+
+				expect(mockContext.helpers.httpRequestWithAuthentication.call).toHaveBeenCalledWith(
+					mockContext,
+					'inveniordmApi',
+					{
+						method: 'GET',
+						url: 'https://test.example.org/api/records?featured=true&size=10',
+					}
+				);
+			});
+
 			it('should handle returnAll=true for getMany', async () => {
 				const mockContext = {
 					getInputData: jest.fn().mockReturnValue([{ json: {} }]),

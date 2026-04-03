@@ -16,6 +16,7 @@ interface QueryParameters extends IDataObject {
   sort?: string;
   size?: number;
   page?: number;
+	featured?: boolean;
   f?: string;  // filter, e.g., language:eng
   l?: string;  // list format
   p?: number;  // page number (alternative to page)
@@ -503,11 +504,13 @@ export class Inveniordm implements INodeType {
 					const additionalFields = this.getNodeParameter('additionalFields', i) as {
 						q?: string;
 						sort?: string;
+              featured?: boolean;
               page?: number;
               f?: string;
 					};						const qs: QueryParameters = {};
 						if (additionalFields.q) qs.q = additionalFields.q;
 						if (additionalFields.sort) qs.sort = additionalFields.sort;
+            if (additionalFields.featured === true) qs.featured = true;
             if (additionalFields.page) qs.page = additionalFields.page;
             if (additionalFields.f) qs.f = additionalFields.f;
 
@@ -649,11 +652,13 @@ export class Inveniordm implements INodeType {
 						const additionalFields = this.getNodeParameter('additionalFields', i) as {
 							q?: string;
 							sort?: string;
+							featured?: boolean;
 						};
 
 						const qs: QueryParameters = {};
 						if (additionalFields.q) qs.q = additionalFields.q;
 						if (additionalFields.sort) qs.sort = additionalFields.sort;
+						if (additionalFields.featured === true) qs.featured = true;
 
 						if (!returnAll) {
 							const limit = this.getNodeParameter('limit', i) as number;
@@ -689,6 +694,7 @@ export class Inveniordm implements INodeType {
 						const additionalFields = this.getNodeParameter('additionalFields', i) as {
 							q?: string;
 							sort?: string;
+							featured?: boolean;
 						};
 
 						const qs: QueryParameters = {
@@ -696,6 +702,7 @@ export class Inveniordm implements INodeType {
 							p: 1,
 						};
 						if (additionalFields.q) qs.q = additionalFields.q;
+						if (additionalFields.featured === true) qs.featured = true;
 						if (additionalFields.sort) {
 							qs.sort = additionalFields.sort;
 						} else {
