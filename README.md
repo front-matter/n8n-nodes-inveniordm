@@ -1,7 +1,6 @@
 # n8n-nodes-inveniordm
 
 ![Tests](https://github.com/front-matter/n8n-nodes-inveniordm/workflows/Tests/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/front-matter/n8n-nodes-inveniordm/badge.svg?branch=main)](https://coveralls.io/github/front-matter/n8n-nodes-inveniordm?branch=main)
 [![npm version](https://badge.fury.io/js/n8n-nodes-inveniordm.svg)](https://badge.fury.io/js/n8n-nodes-inveniordm)
 
 This is an n8n community node. It lets you use InvenioRDM in your n8n workflows.
