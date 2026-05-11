@@ -87,16 +87,5 @@ jobs:
         run: npm ci
 
       - name: Publish package
-        # Publishes to npm with a provenance attestation (requires id-token: write above).
-        # Use npm publish directly in CI because `n8n-node release` expects a symbolic
-        # branch ref and fails on detached HEAD tag checkouts.
-        #
-        # Option A (OIDC): leave NPM_TOKEN unset — the token step is skipped and
-        #   npm uses the OIDC exchange instead.
-        # Option B (token): set NPM_TOKEN in repo secrets — it is written to
-        #   .npmrc here before publishing.
         run: |
-          [ -n "$NPM_TOKEN" ] && npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
-          npm publish --provenance
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          npm publish --provenance --access public
