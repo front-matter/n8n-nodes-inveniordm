@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-inveniordm",
-	"version": "0.1.21",
+	"version": "0.1.22",
 	"description": "n8n node for InvenioRDM API",
 	"license": "MIT",
 	"homepage": "https://github.com/front-matter/n8n-nodes-inveniordm",
@@ -25,7 +25,8 @@
 		"test:watch": "jest --watch",
 		"test:coverage": "jest --coverage",
 		"test:e2e": "jest --testPathPattern=e2e",
-		"release": "n8n-node release"
+		"release": "n8n-node release",
+		"prepublishOnly": "npm run build"
 	},
 	"files": [
 		"dist"
