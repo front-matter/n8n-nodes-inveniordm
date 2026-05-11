@@ -249,6 +249,44 @@ describe('Inveniordm Node - Execute Method Tests', () => {
 				);
 			});
 
+			it('should include language=deu in getMany query parameters when language is German', async () => {
+				const mockContext = {
+					getInputData: jest.fn().mockReturnValue([{ json: {} }]),
+					getNodeParameter: jest.fn()
+						.mockReturnValueOnce('record')
+						.mockReturnValueOnce('getMany')
+						.mockReturnValueOnce(false) // returnAll
+						.mockReturnValueOnce({ language: 'deu' }) // additionalFields
+						.mockReturnValueOnce(10), // limit
+					getCredentials: jest.fn().mockResolvedValue({ baseUrl: 'https://test.example.org/api' }),
+					helpers: {
+						httpRequestWithAuthentication: {
+							call: jest.fn().mockResolvedValue({
+								hits: {
+									hits: Array(2).fill(null).map((_, i) => ({ id: i, title: `Record ${i}` }))
+								}
+							}),
+						},
+					},
+					logger: {
+						info: jest.fn(),
+					},
+					getNode: jest.fn(),
+					continueOnFail: jest.fn().mockReturnValue(false),
+				};
+
+				await node.execute.call(mockContext as any);
+
+				expect(mockContext.helpers.httpRequestWithAuthentication.call).toHaveBeenCalledWith(
+					mockContext,
+					'inveniordmApi',
+					{
+						method: 'GET',
+						url: 'https://test.example.org/api/records?language=deu&size=10',
+					}
+				);
+			});
+
 			it('should handle returnAll=true for getMany', async () => {
 				const mockContext = {
 					getInputData: jest.fn().mockReturnValue([{ json: {} }]),

@@ -17,6 +17,7 @@ interface QueryParameters extends IDataObject {
   size?: number;
   page?: number;
 	featured?: boolean;
+  language?: string;  // language filter, e.g., deu
   f?: string;  // filter, e.g., language:eng
   l?: string;  // list format
   p?: number;  // page number (alternative to page)
@@ -505,12 +506,14 @@ export class Inveniordm implements INodeType {
 						q?: string;
 						sort?: string;
               featured?: boolean;
+              language?: string;
               page?: number;
               f?: string;
 					};						const qs: QueryParameters = {};
 						if (additionalFields.q) qs.q = additionalFields.q;
 						if (additionalFields.sort) qs.sort = additionalFields.sort;
             if (additionalFields.featured === true) qs.featured = true;
+            if (additionalFields.language) qs.language = additionalFields.language;
             if (additionalFields.page) qs.page = additionalFields.page;
             if (additionalFields.f) qs.f = additionalFields.f;
 
