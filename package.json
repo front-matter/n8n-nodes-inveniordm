@@ -25,8 +25,7 @@
 		"test:watch": "jest --watch",
 		"test:coverage": "jest --coverage",
 		"test:e2e": "jest --testPathPattern=e2e",
-		"release": "n8n-node release",
-		"prepublishOnly": "n8n-node prerelease"
+		"release": "n8n-node release"
 	},
 	"files": [
 		"dist"
